@@ -22,6 +22,8 @@ class SlowImageDownloadSignature(ErrorSignature):
     )
     minimum_download_rate_mb = 10
 
+    logs_required = False
+
     def analyze(self, log_analyzer) -> Optional[SignatureResult]:
         """Analyze image download speeds."""
         try:

@@ -10,14 +10,14 @@ import json
 import os
 import asyncio
 from typing import Any, Annotated
-
+import argparse
 from jinja2 import TemplateError
 import requests
 import uvicorn
 from pydantic import Field
 from assisted_service_client import models
 from mcp.server.fastmcp import FastMCP
-from log_analyzer.main import analyze_cluster
+from log_analyzer.main import analyze_cluster, analyze_cluster_logs
 
 from metrics import metrics, track_tool_usage, initiate_metrics
 from service_client import InventoryClient
@@ -1015,17 +1015,6 @@ async def set_cluster_ssh_key(
     return result.to_str()
 
 
-@track_tool_usage()
-async def analyze_cluster_logs(
-    cluster_id: Annotated[str, Field(description="The ID of the cluster")],
-) -> str:
-    """
-    Analyze the cluster logs for the given cluster_id and return the results.
-    """
-    client = InventoryClient(get_access_token())
-    results = await analyze_cluster(cluster_id=cluster_id, api_client=client)
-    return "\n\n".join([str(r) for r in results])
-
 
 def list_tools() -> list[str]:
     """List all MCP tools."""
@@ -1035,18 +1024,15 @@ def list_tools() -> list[str]:
 
     return asyncio.run(mcp_list_tools())
 
+async def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--cluster-id", type=str, required=True)
+    args = parser.parse_args()
+    token = os.environ.get("OFFLINE_TOKEN")
+    cluster_id = args.cluster_id
+    client = InventoryClient(token)
+    results = await analyze_cluster_logs(cluster_id=cluster_id, api_client=client)
+    print(results)
 
 if __name__ == "__main__":
-    if transport_type == "streamable-http":
-        app = mcp.streamable_http_app()
-        log.info("Using StreamableHTTP transport (stateless)")
-    else:
-        app = mcp.sse_app()
-        log.info("Using SSE transport (stateful)")
-
-    if TROUBLESHOOTING_ENABLED:
-        mcp.add_tool(analyze_cluster_logs)
-
-    initiate_metrics(list_tools())
-    app.add_route("/metrics", metrics)
-    uvicorn.run(app, host="0.0.0.0")
+    asyncio.run(main())
