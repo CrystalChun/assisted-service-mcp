@@ -9,7 +9,6 @@ environments, and host management.
 import asyncio
 from typing import Any, Optional, cast, Callable, TypeVar
 from urllib.parse import urlparse
-
 import nestedarchive
 import requests
 from requests.exceptions import RequestException
@@ -18,8 +17,8 @@ from assisted_service_client import ApiClient, Configuration, PresignedUrl, api,
 from assisted_service_mcp.src.logger import log
 from assisted_service_mcp.src.metrics.metrics import API_CALL_LATENCY
 from assisted_service_mcp.src.settings import get_setting
-from .exceptions import sanitize_exceptions
-from .helpers import Helpers
+from assisted_service_mcp.src.service_client.exceptions import sanitize_exceptions
+from assisted_service_mcp.src.service_client.helpers import Helpers
 
 T = TypeVar("T")
 
@@ -413,7 +412,7 @@ class InventoryClient:
             only_latest: Whether to return only the latest versions.
 
         Returns:
-            models.OpenshiftVersions: Object containing available OpenShift versions.
+            list[models.OpenshiftVersion]: List of OpenShift versions.
         """
         log.info("Getting OpenShift versions (only_latest: %s)", only_latest)
         result = await self._api_call(
