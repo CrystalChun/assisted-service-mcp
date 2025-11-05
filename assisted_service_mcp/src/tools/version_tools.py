@@ -61,7 +61,7 @@ async def display_versions(get_access_token_func: Callable[[], str]) -> str:
         return_str = f"{header}\n{separator}\n"
 
         versions_added = set()
-        for _, version in result.to_dict().items():
+        for _, version in result.items():
             display_name = version.get("display_name", "")
             match = re.search(r"\d+\.\d+\.\d+", display_name)
             if match and match.group(0) not in versions_added:
