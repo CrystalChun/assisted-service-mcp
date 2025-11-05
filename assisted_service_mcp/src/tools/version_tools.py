@@ -34,8 +34,7 @@ async def list_versions(get_access_token_func: Callable[[], str]) -> str:
 
 @track_tool_usage()
 async def display_versions(get_access_token_func: Callable[[], str]) -> str:
-    """Displays the OpenShift versions in a formatted table for a user when they request
-    to show or list the available versions.
+    """When a user requests to show or list the available OpenShift versions, this function displays the OpenShift versions in a formatted table.
 
     This table is formatted as:
     OpenShift Version  | Support Level
