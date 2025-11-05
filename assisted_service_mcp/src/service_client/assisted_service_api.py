@@ -112,6 +112,25 @@ class InventoryClient:
             netloc=parsed_inventory_url.netloc, scheme=parsed_inventory_url.scheme
         ).geturl()
 
+    def _modify_openshift_version_support_level(
+        self, openshift_versions: models.OpenshiftVersions
+    ) -> models.OpenshiftVersions:
+        for _, version in openshift_versions.items():
+            support_level = version.get("support_level")
+            match support_level:
+                case "production":
+                    support_level = "Full Support"
+                case "maintenance":
+                    support_level = "Maintenance Support"
+                case "end-of-life":
+                    support_level = "End of Life"
+                case "beta":
+                    support_level = "Release Candidate"
+                case "Extended Support":
+                    support_level = "Extended Support"
+            version["support_level"] = support_level
+        return openshift_versions
+
     @sanitize_exceptions
     async def get_cluster(
         self, cluster_id: str, get_unregistered_clusters: bool = False
@@ -412,7 +431,7 @@ class InventoryClient:
             only_latest: Whether to return only the latest versions.
 
         Returns:
-            list[models.OpenshiftVersion]: List of OpenShift versions.
+            models.OpenshiftVersions: OpenShift versions.
         """
         log.info("Getting OpenShift versions (only_latest: %s)", only_latest)
         result = await self._api_call(
@@ -420,7 +439,10 @@ class InventoryClient:
             only_latest=only_latest,
         )
         log.info("Successfully retrieved OpenShift versions")
-        return cast(models.OpenshiftVersions, result)
+        openshift_versions = cast(models.OpenshiftVersions, result)
+        for version in openshift_versions.values():
+            version["support_level"] = "test"
+        return openshift_versions
 
     @sanitize_exceptions
     async def get_operator_bundles(self) -> list[dict[str, Any]]:

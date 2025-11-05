@@ -1,6 +1,7 @@
 """Version and operator management tools for Assisted Service MCP Server."""
 
 import json
+import re
 from typing import Callable
 
 from assisted_service_mcp.src.metrics import track_tool_usage
@@ -26,6 +27,49 @@ async def list_versions(get_access_token_func: Callable[[], str]) -> str:
         result = await client.get_openshift_versions(True)
         log.info("Successfully retrieved OpenShift versions")
         return json.dumps(result)
+    except Exception as e:
+        log.error("Failed to retrieve OpenShift versions: %s", str(e))
+        raise
+
+
+@track_tool_usage()
+async def display_versions(get_access_token_func: Callable[[], str]) -> str:
+    """Displays the OpenShift versions in a formatted table for a user when they request
+    to show or list the available versions.
+
+    This table is formatted as:
+    OpenShift Version  | Support Level
+    --------------------+---------------
+    <openshift_version> | <support_level>
+    <openshift_version> | <support_level>
+    ...
+
+    Returns:
+        str: A table-formatted string containing available OpenShift versions and their support status.
+    """
+    log.info("Retrieving available OpenShift versions")
+    client = InventoryClient(get_access_token_func())
+    try:
+        result = await client.get_openshift_versions(True)
+
+        log.info("Successfully retrieved OpenShift versions")
+
+        column_width = 30
+        # Build formatted table
+        header = f"{'Version':<{column_width}} | {'Support Level':<{column_width}}"
+        separator = f"{'-' * column_width}-+-{'-' * column_width}"
+        return_str = f"{header}\n{separator}\n"
+
+        versions_added = set()
+        for version in result.values():
+            display_name = version.get("display_name", "")
+            match = re.search(r"\d+\.\d+\.\d+", display_name)
+            if match and match.group(0) not in versions_added:
+                versions_added.add(match.group(0))
+                return_str += f"{match.group(0):<{column_width}} | {version.get('support_level', ''):<{column_width}}\n"
+
+        print(return_str)
+        return return_str
     except Exception as e:
         log.error("Failed to retrieve OpenShift versions: %s", str(e))
         raise
