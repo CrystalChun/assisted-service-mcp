@@ -89,6 +89,7 @@ class AssistedServiceMCPServer:
 
         # Register version tools
         self.mcp.tool()(self._wrap_tool(version_tools.list_versions))
+        self.mcp.tool()(self._wrap_tool(version_tools.display_versions))
 
         # Register operator bundle tools
         self.mcp.tool()(self._wrap_tool(operator_tools.list_operator_bundles))
