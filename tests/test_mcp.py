@@ -26,6 +26,7 @@ def test_mcp_registers_tools_and_auth_closures() -> None:
         "cluster_iso_download_url",
         "cluster_credentials_download_url",
         "list_versions",
+        "display_versions",
         "list_operator_bundles",
         "add_operator_bundle_to_cluster",
         "set_host_role",

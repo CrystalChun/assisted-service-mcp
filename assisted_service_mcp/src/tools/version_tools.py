@@ -55,18 +55,30 @@ async def display_versions(get_access_token_func: Callable[[], str]) -> str:
         log.info("Successfully retrieved OpenShift versions")
 
         column_width = 30
-        # Build formatted table
-        header = f"{'Version':<{column_width}} | {'Support Level':<{column_width}}"
-        separator = f"{'-' * column_width}-+-{'-' * column_width}"
-        return_str = f"{header}\n{separator}\n"
 
-        versions_added = set()
-        for _, version in result.items():
+        # Extract unique versions with their support levels
+        unique_versions = {}
+        for version in result.values():
             display_name = version.get("display_name", "")
-            match = re.search(r"\d+\.\d+\.\d+", display_name)
-            if match and match.group(0) not in versions_added:
-                versions_added.add(match.group(0))
-                return_str += f"{match.group(0):<{column_width}} | {format_openshift_version_support_level(version.get('support_level', '')):<{column_width}}\n"
+            if match := re.search(r"\d+\.\d+\.\d+", display_name):
+                version_num = match.group(0)
+                if version_num not in unique_versions:
+                    unique_versions[version_num] = (
+                        format_openshift_version_support_level(
+                            version.get("support_level", "")
+                        )
+                    )
+
+        # Build formatted table
+        header = (
+            f"{'OpenShift Version':<{column_width}} | {'Support Level':<{column_width}}"
+        )
+        separator = f"{'-' * column_width}-+-{'-' * column_width}"
+        rows = [
+            f"{version:<{column_width}} | {support_level:<{column_width}}"
+            for version, support_level in unique_versions.items()
+        ]
+        return_str = f"{header}\n{separator}\n" + "\n".join(rows) + "\n"
 
         print(return_str)
         return return_str
