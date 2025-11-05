@@ -132,6 +132,8 @@ The MCP server provides the following tools for interacting with the OpenShift A
 
 * **list_versions** - Lists the available OpenShift versions for installation with the assisted installer
 
+* **display_versions** - Displays the available OpenShift versions and their support levels as a table for an end-user
+
 * **list_operator_bundles** - Lists the operator bundles that can be optionally added to a cluster during installation
 
 * **add_operator_bundle_to_cluster** - Request an operator bundle to be installed with the given cluster

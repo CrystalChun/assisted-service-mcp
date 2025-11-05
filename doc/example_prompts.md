@@ -89,8 +89,16 @@ Get presigned download URLs for cluster credential files.
 List all available OpenShift versions.
 
 **Example Prompts:**
+- "List all available OpenShift versions"
+
+### `display_versions`
+Display all available OpenShift versions as a table.
+
+**Example Prompts:**
 - "What OpenShift versions are available?"
 - "Show me all the OpenShift versions I can install"
+- "Show me all available OpenShift versions"
+
 
 ### `list_operator_bundles`
 List available operator bundles.

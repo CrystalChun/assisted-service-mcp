@@ -9,6 +9,22 @@ from assisted_service_mcp.src.service_client.assisted_service_api import Invento
 from assisted_service_mcp.src.logger import log
 
 
+def format_openshift_version_support_level(support_level: str) -> str:
+    match support_level:
+        case "production":
+            return "Full Support"
+        case "maintenance":
+            return "Maintenance Support"
+        case "end-of-life":
+            return "End of Life"
+        case "beta":
+            return "Release Candidate"
+        case "Extended Support":
+            return "Extended Support"
+        case _:
+            return support_level
+
+
 @track_tool_usage()
 async def list_versions(get_access_token_func: Callable[[], str]) -> str:
     """List all available OpenShift versions for installation.
@@ -56,7 +72,7 @@ async def display_versions(get_access_token_func: Callable[[], str]) -> str:
 
         column_width = 30
 
-        # Extract unique versions with their support levels
+        # Filter for unique versions and their support levels
         unique_versions = {}
         for version in result.values():
             display_name = version.get("display_name", "")
@@ -85,19 +101,3 @@ async def display_versions(get_access_token_func: Callable[[], str]) -> str:
     except Exception as e:
         log.error("Failed to retrieve OpenShift versions: %s", str(e))
         raise
-
-
-def format_openshift_version_support_level(support_level: str) -> str:
-    match support_level:
-        case "production":
-            return "Full Support"
-        case "maintenance":
-            return "Maintenance Support"
-        case "end-of-life":
-            return "End of Life"
-        case "beta":
-            return "Release Candidate"
-        case "Extended Support":
-            return "Extended Support"
-        case _:
-            return support_level
